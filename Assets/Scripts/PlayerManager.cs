@@ -55,7 +55,7 @@ public class PlayerManager : BaseManager
     {
         Debug.Log("AI Turn");
         _playerButtons.interactable = false;
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSecondsRealtime(2f);
         _aiManager.TakeTurn();
         
     }

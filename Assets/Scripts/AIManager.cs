@@ -14,7 +14,12 @@ public class AIManager : BaseManager
     }
     public State currentState;
 
+    public bool dead;
+
+    [SerializeField] protected StartCombat startCombat;
+
     protected PlayerManager _player;
+    [SerializeField] protected Animator _anim;
 
 
     protected override void Start()
@@ -25,13 +30,25 @@ public class AIManager : BaseManager
         {
             Debug.Log("Player Manager Not Found");
         }
+
+        _anim.SetBool("isEnemy", true);
+    }
+
+    public void Refresh()
+    {
+        if (_health < _maxHealth)
+            _health = _maxHealth;
+        currentState = State.fullHP;
+        dead = false;
+        UpdateHealthText();
+        _player.TakeTurn();
     }
 
     public override void TakeTurn()
     {
         if (_health < 40)
             currentState = State.lowHP;
-                else
+        else
             currentState = State.fullHP;
 
         if (_health == 0)
@@ -53,13 +70,13 @@ public class AIManager : BaseManager
         }
 
         if (_health > 0)
-        StartCoroutine(EndTurn());
+            StartCoroutine(EndTurn());
     }
 
 
     IEnumerator EndTurn()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSecondsRealtime(2f);
         _player.TakeTurn();
         Debug.Log("Player Turn");
     }
@@ -109,18 +126,36 @@ public class AIManager : BaseManager
     public void DeadState()
     {
         Debug.Log("You Win!");
+        
+        StartCoroutine(EndCombat());
+        
     }
 
+    IEnumerator EndCombat()
+    {
+        if (!dead)
+        {
+            dead = true;
+            yield return new WaitForSecondsRealtime(1f);
+            startCombat.EndCombat();
+        }
+
+    }
+
+
+    #region Attacks
     public void VineWhip()
     {
         _player.DealDamage(15f);
         Debug.Log("VineWhip");
+        _anim.SetTrigger("VineWhip");
     }
 
     public void RazorLeaf()
     {
         _player.DealDamage(25f);
         Debug.Log("RazorLeaf");
+        _anim.SetTrigger("RazorLeaf");
     }
 
 
@@ -128,12 +163,17 @@ public class AIManager : BaseManager
     {
         Heal(25f);
         Debug.Log("Heal");
+        _anim.SetTrigger("Synthesis");
     }
 
     public void SelfImmolate()
     {
         DealDamage(_maxHealth);
         _player.DealDamage(90f);
+        _anim.SetTrigger("Immolate");
         Debug.Log("SD");
     }
+    #endregion
+
+
 }
