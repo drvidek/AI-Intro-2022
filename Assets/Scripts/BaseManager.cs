@@ -6,9 +6,10 @@ using UnityEngine.UI;
 public abstract class BaseManager : MonoBehaviour
 {
     [SerializeField] protected float _health = 100f;
-    [SerializeField] protected float _maxHealth = 100f;
+    [SerializeField] protected float _healthMax = 100f;
 
     [SerializeField] protected Text _healthText;
+    [SerializeField] protected Text _healthMaxText;
 
     protected virtual void Start()
     {
@@ -20,7 +21,7 @@ public abstract class BaseManager : MonoBehaviour
 
     public void Heal(float heal)
     {
-        _health = Mathf.Min(_health + heal, _maxHealth);
+        _health = Mathf.Min(_health + heal, _healthMax);
         UpdateHealthText();
     }
 
@@ -38,5 +39,7 @@ public abstract class BaseManager : MonoBehaviour
     {
         if (_healthText != null)
         _healthText.text = _health.ToString();
+        if (_healthMaxText != null)
+            _healthMaxText.text = _healthMax.ToString();
     }
 }

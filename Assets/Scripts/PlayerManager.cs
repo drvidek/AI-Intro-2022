@@ -45,7 +45,7 @@ public class PlayerManager : BaseManager
 
     public void SelfImmolate()
     {
-        DealDamage(_maxHealth);
+        DealDamage(_healthMax);
         _aiManager.DealDamage(90f);
         StartCoroutine(EndTurn());
     }

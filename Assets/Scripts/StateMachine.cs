@@ -6,10 +6,9 @@ public class StateMachine : MonoBehaviour
 {
     public enum State
     {
+        berrypick,
         attack,
-        defend,
-        run,
-        berrypick
+        run
     }
 
     public State currentState;
@@ -18,62 +17,59 @@ public class StateMachine : MonoBehaviour
 
     public float chaseDist;
 
+    public bool alone;
+
     private void Start()
     {
         aiMovement = GetComponent<AIMovement>();
+        currentState = State.berrypick;
         NextState();
     }
 
     private void NextState()
     {
+        Debug.Log("Next State");
         switch (currentState)
         {
+            case State.berrypick:
+                StartCoroutine(BerryState());
+                break;
             case State.attack:
                 StartCoroutine(AttackState());
-                break;
-            case State.defend:
-                StartCoroutine(DefendState());
                 break;
             case State.run:
                 StartCoroutine(RunState());
                 break;
-            case State.berrypick:
-                StartCoroutine(BerryState());
-                break;
+            
         }
     }
 
+    private void CheckAlone()
+    {
+        var _enemyCount = GameObject.FindGameObjectsWithTag("Enemy");
+        if (_enemyCount.Length <= 1)
+            alone = true;
+    }
 
     private IEnumerator AttackState()
     {
         Debug.Log("Attack: Enter");
-
-        aiMovement.WaypointCreate();
 
         while (currentState == State.attack)
         {
             aiMovement.AIMove(aiMovement.player);
             if (Vector2.Distance(transform.position, aiMovement.player.position) > chaseDist)
             {
-                
-                currentState = State.berrypick;
+                CheckAlone();
+                if (!alone)
+                    currentState = State.berrypick;
+                else
+                    currentState = State.run;
             }
             yield return null;
         }
-        aiMovement.ChaseEnd();
+        aiMovement.FindNearestWaypoint();
         Debug.Log("Attack: Exit");
-        NextState();
-    }
-
-    private IEnumerator DefendState()
-    {
-        Debug.Log("Defend: Enter");
-        while (currentState == State.defend)
-        {
-            Debug.Log("Defending");
-            yield return null;
-        }
-        Debug.Log("Defend: Exit");
         NextState();
     }
 
@@ -82,7 +78,11 @@ public class StateMachine : MonoBehaviour
         Debug.Log("Run: Enter");
         while (currentState == State.run)
         {
-            Debug.Log("Running");
+            aiMovement.AIMoveAway(aiMovement.player.transform);
+            if (Vector2.Distance(transform.position, aiMovement.player.position) > chaseDist * 1.5f)
+            {
+                currentState = State.berrypick;
+            }
             yield return null;
         }
         Debug.Log("Run: Exit");
@@ -100,7 +100,11 @@ public class StateMachine : MonoBehaviour
 
             if (Vector2.Distance(transform.position, aiMovement.player.position) < chaseDist)
             {
-                currentState = State.attack;
+                CheckAlone();
+                if (!alone)
+                    currentState = State.attack;
+                else
+                    currentState = State.run;
             }
             yield return null;
         }

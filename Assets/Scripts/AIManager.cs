@@ -31,13 +31,13 @@ public class AIManager : BaseManager
             Debug.Log("Player Manager Not Found");
         }
 
-        _anim.SetBool("isEnemy", true);
+        
     }
 
     public void Refresh()
     {
-        if (_health < _maxHealth)
-            _health = _maxHealth;
+        if (_health < _healthMax)
+            _health = _healthMax;
         currentState = State.fullHP;
         dead = false;
         UpdateHealthText();
@@ -46,7 +46,7 @@ public class AIManager : BaseManager
 
     public override void TakeTurn()
     {
-        if (_health < 40)
+        if (_health < _healthMax / 2)
             currentState = State.lowHP;
         else
             currentState = State.fullHP;
@@ -146,6 +146,7 @@ public class AIManager : BaseManager
     #region Attacks
     public void VineWhip()
     {
+        _anim.SetBool("isEnemy", true);
         _player.DealDamage(15f);
         Debug.Log("VineWhip");
         _anim.SetTrigger("VineWhip");
@@ -168,7 +169,7 @@ public class AIManager : BaseManager
 
     public void SelfImmolate()
     {
-        DealDamage(_maxHealth);
+        DealDamage(_healthMax);
         _player.DealDamage(90f);
         _anim.SetTrigger("Immolate");
         Debug.Log("SD");

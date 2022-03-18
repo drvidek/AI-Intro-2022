@@ -9,7 +9,6 @@ public class AIMovement : MonoBehaviour
     public float chaseDist;
 
     public List<Transform> waypoints;
-    //public Transform[] waypoints;
     public int waypointIndex = 0;
     public GameObject waypointPrefab;
 
@@ -18,24 +17,28 @@ public class AIMovement : MonoBehaviour
 
     private bool chasing = false;
 
+    public SpriteRenderer spriteRenderer;
 
-    public void WaypointCreate()
+    public void Start()
     {
-        GameObject wpoint = Instantiate(waypointPrefab, transform.position, Quaternion.identity);
-        waypoints.Add(wpoint.transform);
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        FindNearestWaypoint();
+        ShuffleWaypoints();
     }
 
     public void AIMove(Transform goal)
     {
         Vector2 AIPosition = transform.position;
-
+        Vector2 dirToGoal = goal.position - transform.position;
+        SetSpriteDir(dirToGoal.x);
 
         //if we're not near the goal
         if (Vector2.Distance(AIPosition, goal.position) > minGoalDist)
         {
-            Vector2 dirToGoal = goal.position - transform.position;
+
             dirToGoal.Normalize();
             transform.position += (Vector3)dirToGoal * speed * Time.deltaTime;
+
         }
         else
         {
@@ -47,11 +50,31 @@ public class AIMovement : MonoBehaviour
         {
             chasing = true;
         }
-
-
     }
 
-    public void ChaseEnd()
+    public void AIMoveAway(Transform goal)
+    {
+        Vector2 dirToGoal = transform.position - goal.position;
+        SetSpriteDir(dirToGoal.x);
+        dirToGoal.Normalize();
+        transform.position += (Vector3)dirToGoal * speed * Time.deltaTime;
+
+        chasing = false;
+    }
+
+    public void SetSpriteDir(float xdir)        ///this straight up wasn't working inside AIMove() so it's a method instead
+    {
+        if (xdir > 0)
+        {
+            spriteRenderer.flipX = false;
+        }
+        else
+        {
+            spriteRenderer.flipX = true;
+        }
+    }
+
+    public void FindNearestWaypoint()
     {
         int closePoint = 0;
         float dist = float.PositiveInfinity;
@@ -62,22 +85,21 @@ public class AIMovement : MonoBehaviour
             //check if the distance to point i is smaller than point i-1
             if (tempDist < dist)
             {
+                //if it is, set the new minimum distance to that distance, and save which waypoint index it was
                 dist = tempDist;
                 closePoint = i;
             }
         }
-        //then move to the nearest point
+        //then set the waypoint index to the point determined
         waypointIndex = closePoint;
     }
 
-    public void WaypointUpdate()
+    public void WaypointUpdate()        //update which waypoint we are moving towards
     {
-        Vector2 AIPosition = transform.position;
-
-
         //once we reach the goal
-        if (transform.position == waypoints[waypointIndex].position) //(Vector2.Distance(AIPosition, waypoints[waypointIndex].transform.position) < minGoalDist)
+        if (transform.position == waypoints[waypointIndex].position)
         {
+            //increment the waypoint index and wrap back to zero if we surpass maximum
             waypointIndex++;
             if (waypointIndex >= waypoints.Count)
             {
@@ -85,34 +107,17 @@ public class AIMovement : MonoBehaviour
             }
         }
     }
+
+    public void ShuffleWaypoints()      //
+    {
+        for (int i = 0; i < waypoints.Count; i++)
+        {
+            Transform temp = waypoints[i];  //save the current entry in a variable
+            int randomIndex = Random.Range(i, waypoints.Count); //choose a random number between the current entry and the list maximum
+
+            //swaps the two points
+            waypoints[i] = waypoints[randomIndex];
+            waypoints[randomIndex] = temp;
+        }
+    }
 }
-
-
-/*          METHOD 1
-if (transform.position.x < position0.transform.position.x)
-{
-    transform.position += Vector3.right * 1 * Time.deltaTime;
-}
-else
-{
-    transform.position -= Vector3.right * 1 * Time.deltaTime;
-}
-
-if (transform.position.y < position0.transform.position.y)
-{
-    transform.position += Vector3.up * 1 * Time.deltaTime;
-}
-else
-{
-    transform.position -= Vector3.up * 1 * Time.deltaTime;
-}
-
-            METHOD 2
-
-
-AIPosition.x = AIPosition.x + (1 * Time.deltaTime);
-
-transform.position = AIPosition;
-*/
-
-//transform.position = Vector2.MoveTowards(transform.position, position0.transform.position, 1 * Time.deltaTime);
