@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AIManager : BaseManager
 {
@@ -20,6 +21,8 @@ public class AIManager : BaseManager
 
     protected PlayerManager _player;
     [SerializeField] protected Animator _anim;
+    [SerializeField] protected Text _attacktext;
+    [SerializeField] protected Image _image;
 
 
     protected override void Start()
@@ -30,8 +33,7 @@ public class AIManager : BaseManager
         {
             Debug.Log("Player Manager Not Found");
         }
-
-        
+        _attacktext.text = "";
     }
 
     public void Refresh()
@@ -40,13 +42,15 @@ public class AIManager : BaseManager
             _health = _healthMax;
         currentState = State.fullHP;
         dead = false;
+        _attacktext.text = "";
+        _image.enabled = true;
         UpdateHealthText();
         _player.TakeTurn();
     }
 
     public override void TakeTurn()
     {
-        if (_health < _healthMax / 2)
+        if (_health <= _healthMax / 2)
             currentState = State.lowHP;
         else
             currentState = State.fullHP;
@@ -78,24 +82,19 @@ public class AIManager : BaseManager
     {
         yield return new WaitForSecondsRealtime(2f);
         _player.TakeTurn();
-        Debug.Log("Player Turn");
+        _attacktext.text = "";
     }
 
     public void FullHPState()
     {
         int randomAttack = Random.Range(0, 10);
-        if (randomAttack <= 2)
+        if (randomAttack <= 3)
         {
             RazorLeaf();
         }
         else
-            if (randomAttack <= 8)
         {
             VineWhip();
-        }
-        else
-        {
-            SelfImmolate();
         }
     }
 
@@ -107,28 +106,23 @@ public class AIManager : BaseManager
             Synthesis();
         }
         else
-            if (randomAttack <= 6)
+            if (randomAttack <= 7)
         {
 
             RazorLeaf();
         }
         else
-            if (randomAttack <= 7)
         {
             VineWhip();
-        }
-        else
-        {
-            SelfImmolate();
         }
     }
 
     public void DeadState()
     {
-        Debug.Log("You Win!");
+        _attacktext.text = "Defeated!";
         
         StartCoroutine(EndCombat());
-        
+
     }
 
     IEnumerator EndCombat()
@@ -136,7 +130,10 @@ public class AIManager : BaseManager
         if (!dead)
         {
             dead = true;
+            _anim.SetBool("Dead", true);
             yield return new WaitForSecondsRealtime(1f);
+            _anim.SetBool("Dead", false);
+            yield return null;
             startCombat.EndCombat();
         }
 
@@ -146,33 +143,25 @@ public class AIManager : BaseManager
     #region Attacks
     public void VineWhip()
     {
-        _anim.SetBool("isEnemy", true);
         _player.DealDamage(15f);
-        Debug.Log("VineWhip");
+        _attacktext.text = "Tackle";
+        _anim.SetBool("isEnemy", true);
         _anim.SetTrigger("VineWhip");
     }
 
     public void RazorLeaf()
     {
         _player.DealDamage(25f);
-        Debug.Log("RazorLeaf");
+        _attacktext.text = "Thrash";
         _anim.SetTrigger("RazorLeaf");
     }
 
 
     public void Synthesis()
     {
-        Heal(25f);
-        Debug.Log("Heal");
+        Heal(10f);
+        _attacktext.text = "Eat Berry";
         _anim.SetTrigger("Synthesis");
-    }
-
-    public void SelfImmolate()
-    {
-        DealDamage(_healthMax);
-        _player.DealDamage(90f);
-        _anim.SetTrigger("Immolate");
-        Debug.Log("SD");
     }
     #endregion
 

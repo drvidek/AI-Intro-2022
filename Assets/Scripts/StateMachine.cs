@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class StateMachine : MonoBehaviour
 {
@@ -12,12 +13,12 @@ public class StateMachine : MonoBehaviour
     }
 
     public State currentState;
-
     public AIMovement aiMovement;
-
+    public Image icon;
+    public Sprite[] iconList;
     public float chaseDist;
-
     public bool alone;
+
 
     private void Start()
     {
@@ -42,6 +43,9 @@ public class StateMachine : MonoBehaviour
                 break;
             
         }
+
+        icon.sprite = iconList[(int)currentState];
+        
     }
 
     private void CheckAlone()

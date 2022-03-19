@@ -45,7 +45,7 @@ public class PlayerManager : BaseManager
 
     public void SelfImmolate()
     {
-        DealDamage(_healthMax);
+        DealDamage(_health - 1);
         _aiManager.DealDamage(90f);
         StartCoroutine(EndTurn());
     }
@@ -55,7 +55,7 @@ public class PlayerManager : BaseManager
     {
         Debug.Log("AI Turn");
         _playerButtons.interactable = false;
-        yield return new WaitForSecondsRealtime(2f);
+        yield return new WaitForSecondsRealtime(1.5f);
         _aiManager.TakeTurn();
         
     }

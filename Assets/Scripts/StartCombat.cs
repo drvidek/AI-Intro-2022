@@ -32,7 +32,9 @@ public class StartCombat : MonoBehaviour
         Time.timeScale = 0;
 
         if (aiManager.dead)
-        aiManager.Refresh();
+        {
+            aiManager.Refresh();
+        }
     }
 
     public void EndCombat()
