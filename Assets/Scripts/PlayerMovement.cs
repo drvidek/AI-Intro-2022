@@ -4,13 +4,14 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float speed = 3f;
-    private SpriteRenderer spriteRenderer;
-    private Animator _anim;
+    public float speed = 3f;    //our speed
+    private SpriteRenderer spriteRenderer;  //to store our sprite renderer
+    private Animator _anim; //to store our animator
 
     // Start is called before the first frame update
     void Start()
     {
+        //get our sprite renderer and animator
         spriteRenderer = GetComponent<SpriteRenderer>();
         _anim = GetComponent<Animator>();
     }
@@ -26,7 +27,7 @@ public class PlayerMovement : MonoBehaviour
         //establish a Vector2 for our move direction
         Vector2 moveDir = Vector2.zero;
 
-        //take player input and set direction accordingly
+        //take player input and set XY direction accordingly
         if (Input.GetKey(KeyCode.W))
         {
             moveDir.y += speed * Time.deltaTime;
